@@ -1,0 +1,11 @@
+<div id="aichatbot-action-buttons" class="container">
+    {{#finishbuttondisabled}}
+        <button id="aichatbot-finish-button" type="button" class="btn btn-outline-dark disabled" data-toggle="modal" data-target="#confirmationModal" disabled>{{#str}}finishbutton, mod_aichatbot{{/str}}</button>
+    {{/finishbuttondisabled}}
+    {{^finishbuttondisabled}}
+        <button id="aichatbot-finish-button" type="button" class="btn btn-outline-dark" data-toggle="modal" data-target="#confirmationModal">{{#str}}finishbutton, mod_aichatbot{{/str}}</button>
+    {{/finishbuttondisabled}}
+    <a id="aichatbot-manage-dialogs-button" class="btn btn-outline-dark centered-link" href="{{config.wwwroot}}/mod/aichatbot/manage_dialogs.php?id={{cmid}}">
+        {{#str}}managedialogs, mod_aichatbot{{/str}}
+    </a>
+</div>

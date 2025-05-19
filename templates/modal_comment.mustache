@@ -1,0 +1,21 @@
+<div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="commentModalLabel">{{#str}}writecomment, mod_aichatbot{{/str}}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+            <textarea class="form-control" id="aichatbot-comment-textarea" rows="4">{{comment}}</textarea>
+        </div>
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{#str}}closemodal, mod_aichatbot{{/str}}</button>
+        <button id="aichatbot-save-comment-button" type="button" class="btn btn-dark">{{#str}}save{{/str}}</button>
+      </div>
+    </div>
+  </div>
+</div>

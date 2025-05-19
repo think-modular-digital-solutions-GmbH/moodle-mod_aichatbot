@@ -1,0 +1,58 @@
+{{#hasshared}}
+  {{>mod_aichatbot/share_not_available}}
+{{/hasshared}}
+<table id="conversations-table" class="table table-striped table-bordered table-hover">
+  <thead>
+    <tr>
+      <th scope="col" class="text-center" style="width: 10%;">{{#str}}attemptsheader, mod_aichatbot{{/str}}</th>
+      <th scope="col" class="w-25 text-center">{{#str}}actions, mod_aichatbot{{/str}}</th>
+      <th scope="col" class="text-center">{{#str}}comment, mod_aichatbot{{/str}}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#conversations}}
+      <tr data-conversation-id={{id}}>
+        <td scope="row" class="text-center">#{{counter}}</td>
+        <td class="text-center">
+          <a href="{{config.wwwroot}}/mod/aichatbot/preview_dialog.php?action=preview&cid={{id}}&cmid={{cmid}}" class="btn btn-outline-dark aichatbot-preview-button" target="_blank"><i class="fa-regular fa-file-pdf"></i></a>
+          <a href="{{config.wwwroot}}/mod/aichatbot/preview_dialog.php?action=download&cid={{id}}&cmid={{cmid}}" class="btn btn-outline-dark aichatbot-download-button" target="_blank"><i class="fa-solid fa-download"></i></a>
+          {{#hasshared}}
+            <button type="button" class="btn btn-outline-dark aichatbot-share-button disabled {{#issharedconversation}}shared{{/issharedconversation}}" data-toggle="modal" data-target="#shareModal" disabled><i class="fa-solid fa-share"></i></button>
+          {{/hasshared}}
+          {{^hasshared}}
+            <button type="button" class="btn btn-outline-dark aichatbot-share-button" data-toggle="modal" data-target="#shareModal"><i class="fa-solid fa-share"></i></button>
+          {{/hasshared}}
+          {{#ispublic}}
+            <button type="button" class="btn btn-dark aichatbot-public-button"><i class="fa-solid fa-globe"></i></button>
+          {{/ispublic}}
+          {{^ispublic}}
+            <button type="button" class="btn btn-outline-dark aichatbot-public-button"><i class="fa-solid fa-globe"></i></button>
+          {{/ispublic}}
+        </td>
+        <td>{{comment}}</td>
+      </tr>
+    {{/conversations}}
+  </tbody>
+</table>
+<nav>
+  <ul id="pagination" class="pagination"></ul>
+</nav>
+
+<div id="aichatbot-table-caption">
+  <div class="container">
+    <a id="aichatbot-view-all-button" class="btn btn-outline-dark centered-link" target="_blank" href="{{config.wwwroot}}/mod/aichatbot/public_dialogs.php?cmid={{cmid}}">{{#str}}viewall, mod_aichatbot{{/str}}</a>
+    <a id="aichatbot-new-dialog-button" class="btn btn-outline-dark centered-link" href="{{config.wwwroot}}/mod/aichatbot/view.php?id={{cmid}}">
+      {{#str}}newdialog, mod_aichatbot, {{remainingattempts}}{{/str}}
+    </a>
+  </div>
+
+  <div id="aichatbot-table-legend">
+    <small>
+      <i class="fa-regular fa-file-pdf"></i>: preview<br>
+      <i class="fa-solid fa-download"></i>: download<br>
+      <i class="fa-solid fa-share"></i>: share w/teacher<br>
+      <i class="fa-solid fa-globe"></i>: make public<br>
+    </small>
+  </div>
+</div>
+{{>mod_aichatbot/modal_share}}

@@ -1,0 +1,21 @@
+<input id="aichatbot-remaining-interactions" type="hidden" value="{{interactionsremaining}}">
+<input id="aichatbot-remaining-attempts" type="hidden" value="{{attemptsremaining}}">
+<div id="ai-chatbot-remaining-attempts-indicator" class="font-weight-lighter text-center mb-3">Remaining attempts: <span class="font-weight-light">{{attemptsremaining}}</span></div>
+<div id="aichatbot-container" class="container">
+    <div class="chat-window">
+        {{#history}}
+            {{#isuser}}
+                <div class="ai-chat-message message-user bg-light text-dark">{{{content}}}</div>
+            {{/isuser}}
+            {{^isuser}}
+                <div class="ai-chat-message message-chatbot bg-dark text-white">{{{content}}}</div>
+            {{/isuser}}
+        {{/history}}
+    </div>
+    <div class="chat-controls">
+        <input id="aichatbot-input" type="text" class="form-control" placeholder="Type your message here...">
+        <button id="aichatbot-send-button" type="button" class="btn btn-secondary">Send <span class="badge badge-light">{{interactionsremaining}}</span></button>
+    </div>
+</div>
+{{>mod_aichatbot/buttons}}
+{{>mod_aichatbot/modal_confirmation}}
