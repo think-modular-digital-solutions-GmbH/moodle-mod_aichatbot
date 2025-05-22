@@ -421,6 +421,7 @@ function mod_aichatbot_get_user_conversations($cmid) {
     $conversations = $DB->get_records('aichatbot_conversations', [
         'userid' => $USER->id,
         'instanceid' => $cmid,
+        'finished' => 1,
     ]);
 
     return $conversations;
