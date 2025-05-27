@@ -9,6 +9,7 @@ $PAGE->set_url('/mod/aichatbot/public_dialogs.php', ['cmid' => $cmid]);
 $PAGE->requires->css('/mod/aichatbot/style.css');
 $PAGE->requires->jquery();
 $PAGE->requires->js('/mod/aichatbot/js/pagination.js');
+$PAGE->requires->strings_for_js(['sharedsuccess', 'publicsuccess', 'privatesuccess', 'commentupdated', 'warningfinished'], 'mod_aichatbot');
 
 echo $OUTPUT->header();
 echo mod_aichatbot_show_public_dialogs($cmid);

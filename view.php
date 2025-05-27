@@ -16,6 +16,7 @@ $PAGE->set_url('/mod/aichatbot/view.php', ['id' => $id]);
 $PAGE->requires->css('/mod/aichatbot/style.css');
 $PAGE->requires->jquery();
 $PAGE->requires->js('/mod/aichatbot/js/scripts.js');
+$PAGE->requires->strings_for_js(['sharedsuccess', 'publicsuccess', 'privatesuccess', 'commentupdated', 'warningfinished'], 'mod_aichatbot');
 
 mod_aichatbot_view($aichatbot, $course, $cm, $context);
 $completion = new \completion_info($course);

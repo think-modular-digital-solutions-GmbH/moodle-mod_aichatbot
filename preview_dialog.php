@@ -16,17 +16,23 @@ $PAGE->set_context(context_system::instance());
 $PAGE->set_url('/mod/aichatbot/view.php', ['cid' => $conversationid, 'action' => $action]);
 $context = context_module::instance($cmid);
 
+$cm = get_coursemodule_from_id('aichatbot', $cmid, 0, false, MUST_EXIST);
+$aichatbot = $DB->get_record('aichatbot', ['id' => $cm->instance], '*', MUST_EXIST);
+$description = $aichatbot->intro;
+$activityname = $aichatbot->name;
+
+
 $conversation = $DB->get_record('aichatbot_conversations', [
     'id' => $conversationid
 ]);
 
 if($conversation->ispublic) {
-    mod_aichatbot_show_conversation($conversation, $conversationid, $action);
+    mod_aichatbot_show_conversation($conversation, $conversationid, $action, $activityname, $description);
 } else if(mod_aichatbot_user_has_access_to_conversation($conversationid, $USER->id)) {
-    mod_aichatbot_show_conversation($conversation, $conversationid, $action);
+    mod_aichatbot_show_conversation($conversation, $conversationid, $action, $activityname, $description);
 } else if(has_capability('mod/aichatbot:manage', $context)) {
     if($conversation->isshared) {
-        mod_aichatbot_show_conversation($conversation, $conversationid, $action);
+        mod_aichatbot_show_conversation($conversation, $conversationid, $action, $activityname, $description);
     } else {
         mod_aichatbot_no_access();
     }
@@ -34,7 +40,7 @@ if($conversation->ispublic) {
     mod_aichatbot_no_access();
 }
 
-function mod_aichatbot_show_conversation($conversation, $conversationid, $action) {
+function mod_aichatbot_show_conversation($conversation, $conversationid, $action, $activityname = '', $description = '') {
     global $DB;
 
     // we have to get the user becuase the teachers should see the name of the user who submitted the dialog in the document
@@ -54,14 +60,17 @@ function mod_aichatbot_show_conversation($conversation, $conversationid, $action
     $username = fullname($user);
     $switch = true;
 
-    // HTML content for the conversation
-    $html = '<div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 8px; font-family: Lucida Console; border: 1px solid #dde2eb;">';
 
     foreach ($conversationhistory as $c) {
         $timestamp = userdate($c->timestamp, '%d %b %Y, %H:%M'); // Format the timestamp
 
         if ($switch) {
-            $html .= '<h5 style="text-align: center; margin-bottom: 30px;">Dialog submitted by ' . $username . ' ' . $timestamp . '</h5>';
+            $html = '<h2 style="margin-bottom: 0px; font-family: Lucida Console; color:rgb(56, 56, 56);">' . $activityname . '</h2>';
+            if (!empty($description)) {
+                $html .= '<div style="margin-bottom: 20px; font-family: Lucida Console;">' . $description . '</div>';
+            }
+            $html .= '<div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 8px; font-family: Lucida Console; border: 1px solid #dde2eb;">';
+            $html .= '<h5 style="text-align: center; margin-bottom: 30px;">' . get_string('submittedby', 'mod_aichatbot') . $username . ' ' . $timestamp . '</h5>';
             $switch = false;
         }
 

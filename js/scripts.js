@@ -19,6 +19,13 @@ $(document).ready(function() {
     let spinner;
     let conversationId;
 
+    // language strings
+    const sharedsuccess = M.util.get_string('sharedsuccess', 'mod_aichatbot');
+    const publicsuccess = M.util.get_string('publicsuccess', 'mod_aichatbot');
+    const privatesuccess = M.util.get_string('privatesuccess', 'mod_aichatbot');
+    const commentupdated = M.util.get_string('commentupdated', 'mod_aichatbot');
+    const warningfinished = M.util.get_string('warningfinished', 'mod_aichatbot');
+
     let remaininginteractions = $('#aichatbot-remaining-interactions').val();
     if (remaininginteractions < 1) {
         $sendButton.prop('disabled', true);
@@ -90,6 +97,15 @@ $(document).ready(function() {
                         $finishButton.addClass('disabled');
                         $userInput.prop('disabled', true);
                         $userInput.addClass('disabled');
+                        require(['core/notification'], function(notification) {
+                            notification.addNotification({
+                                message: warningfinished,
+                                type: 'danger'
+                            });
+                        });
+                        if ($('.activity-header').length && $('#user-notifications').length) {
+                            $('#user-notifications').insertAfter('.activity-header');
+                        }
                     }
                     $chatWindow.scrollTop($chatWindow[0].scrollHeight);
                     $userInput.focus();
@@ -141,7 +157,7 @@ $(document).ready(function() {
     if (sessionStorage.getItem('aichatbotShareSuccess') === '1') {
         require(['core/notification', 'core/str'], function(notification, str) {
             notification.addNotification({
-                message: 'The dialog has been successfully shared with your teacher!',
+                message: sharedsuccess,
                 type: 'success'
             });
 
@@ -168,12 +184,12 @@ $(document).ready(function() {
                     require(['core/notification'], function(notification) {
                         if (r.responseText == 1) {
                             notification.addNotification({
-                                message: 'The dialog has been successfully made public!',
+                                message: publicsuccess,
                                 type: 'success'
                             });
                         } else {
                             notification.addNotification({
-                                message: 'The dialog has been successfully made private!',
+                                message: privatesuccess,
                                 type: 'warning'
                             });
                         }
@@ -244,7 +260,7 @@ $(document).ready(function() {
                     $('#comment-' + conversationId).html(comment + '<div class="aichatbot-comment-button" data-toggle="modal" data-target="#commentModal"><i class="fa-solid fa-edit"></i></div>');
                     require(['core/notification'], function(notification) {
                         notification.addNotification({
-                            message: 'The comment has been successfully updated!',
+                            message: commentupdated,
                             type: 'success'
                         });
                     });

@@ -12,6 +12,7 @@ $PAGE->requires->css('/mod/aichatbot/style.css');
 $PAGE->requires->jquery();
 $PAGE->requires->js('/mod/aichatbot/js/scripts.js');
 $PAGE->requires->js('/mod/aichatbot/js/pagination.js');
+$PAGE->requires->strings_for_js(['sharedsuccess', 'publicsuccess', 'privatesuccess', 'commentupdated', 'warningfinished'], 'mod_aichatbot');
 
 echo $OUTPUT->header();
 $context = context_module::instance($cmid);

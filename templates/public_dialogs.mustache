@@ -1,6 +1,6 @@
 <div id="public-dialogs-header" class="d-flex justify-content-between align-items-center">
-    <h5>Public Dialogs</h5>
-    <a class="btn btn-outline-dark back-button" href="{{config.wwwroot}}/mod/aichatbot/view.php?id={{cmid}}"><i class="fas fa-arrow-left"></i>&nbsp;&nbsp;Back to the activity</a>
+    <h5>{{#str}}publicdialogs, mod_aichatbot{{/str}}</h5>
+    <a class="btn btn-outline-dark back-button" href="{{config.wwwroot}}/mod/aichatbot/view.php?id={{cmid}}"><i class="fas fa-arrow-left"></i>&nbsp;&nbsp;{{#str}}backtoactivity, mod_aichatbot{{/str}}</a>
 </div>
 
 <table id="conversations-table" class="table table-striped table-bordered table-hover">
@@ -29,7 +29,7 @@
 
 <div id="aichatbot-table-legend">
     <small>
-      <i class="fa-regular fa-file-pdf"></i>: preview<br>
-      <i class="fa-solid fa-download"></i>: download<br>
+      <i class="fa-regular fa-file-pdf"></i>: {{#str}}preview, mod_aichatbot{{/str}}<br>
+      <i class="fa-solid fa-download"></i>: {{#str}}download, mod_aichatbot{{/str}}<br>
     </small>
   </div>
