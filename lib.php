@@ -642,5 +642,15 @@ function aichatbot_completion_rule_enabled($data) {
 }
 
 function mod_aichatbot_remove_emojis($text) {
-    return preg_replace('/[\x{1F000}-\x{1FAFF}\x{1F300}-\x{1F6FF}\x{1F900}-\x{1F9FF}\x{2600}-\x{26FF}\x{2700}-\x{27BF}]/u', '', $text);
+    // Remove emoji sequences (ZWJ, variation selectors, etc.)
+    $text = preg_replace('/\x{200D}|\x{FE0F}/u', '', $text);
+
+    // Remove keycap emojis like 1️⃣ 2️⃣ 3️⃣
+    $text = preg_replace('/[0-9]\x{20E3}/u', '', $text);
+
+    // Remove emojis from extended Unicode ranges
+    $text = preg_replace('/[\x{1F000}-\x{1FFFF}]/u', '', $text);
+    $text = preg_replace('/[\x{2100}-\x{27BF}]/u', '', $text); // Symbols, Dingbats
+
+    return $text;
 }
