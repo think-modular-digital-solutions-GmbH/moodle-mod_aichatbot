@@ -60,14 +60,13 @@ function mod_aichatbot_show_conversation($conversation, $conversationid, $action
     $username = fullname($user);
     $switch = true;
 
-
     foreach ($conversationhistory as $c) {
         $timestamp = userdate($c->timestamp, '%d %b %Y, %H:%M'); // Format the timestamp
 
         if ($switch) {
-            $html = '<h2 style="margin-bottom: 0px; font-family: Lucida Console; color:rgb(56, 56, 56);">' . $activityname . '</h2>';
+            $html = '<h2 style="margin-bottom: 0px; font-family: Lucida Console; color:rgb(56, 56, 56);">' . mod_aichatbot_remove_emojis($activityname) . '</h2>';
             if (!empty($description)) {
-                $html .= '<div style="margin-bottom: 20px; font-family: Lucida Console;">' . $description . '</div>';
+                $html .= '<div style="margin-bottom: 20px; font-family: Lucida Console;">' . mod_aichatbot_remove_emojis($description) . '</div>';
             }
             $html .= '<div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 8px; font-family: Lucida Console; border: 1px solid #dde2eb;">';
             $html .= '<h5 style="text-align: center; margin-bottom: 30px;">' . get_string('submittedby', 'mod_aichatbot') . $username . ' ' . $timestamp . '</h5>';
@@ -76,6 +75,7 @@ function mod_aichatbot_show_conversation($conversation, $conversationid, $action
 
         if (!empty($c->request)) {
             $message = nl2br(htmlspecialchars($c->request));
+            $message = mod_aichatbot_remove_emojis($message);
             $html .= <<<EOD
             <div style="text-align: right;">
                 <span style="font-size: 8pt; color: gray;">$username</span>
@@ -88,6 +88,7 @@ function mod_aichatbot_show_conversation($conversation, $conversationid, $action
 
         if (!empty($c->response)) {
             $message = nl2br(htmlspecialchars($c->response));
+            $message = mod_aichatbot_remove_emojis($message);
             $html .= <<<EOD
             <span style="font-size: 8pt; color: gray;">Bot</span>
             <div style="background-color: #dde2eb; padding: 10px; margin: 10px 0; border-radius: 0 8px 8px 8px; align-self: flex-end; max-width: 80%;">
