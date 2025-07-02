@@ -14,6 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * @package    mod_aichatbot
+ * @copyright  2025 think modular <support@think-modular.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 declare(strict_types=1);
 
 namespace mod_aichatbot\completion;

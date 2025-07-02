@@ -85,6 +85,9 @@ $(document).ready(function() {
                 },
                 success : function(i, r) {
                     let response = JSON.parse(r.responseText)['generatedcontent'];
+                    if (response == null) {
+                        console.warn(r.responseText);
+                    }
                     $responseDiv = $('<div>', {class: 'ai-chat-message message-chatbot bg-dark text-white'} );
                     spinner.remove();
                     $chatWindow.append($responseDiv);
