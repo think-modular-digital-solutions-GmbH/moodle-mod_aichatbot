@@ -64,16 +64,30 @@ switch($action) {
                 prompttext: $finalprompt,
             );
 
+            // Get response.
             $response = $manager->process_action($action);
-            $responsetext = $response->get_response_data();
+            $success = $response->get_success();
 
-            mod_aichatbot_log_conversation($prompttext, $responsetext['generatedcontent'], $cmid);
-            $responsetext['remaininginteractions'] = mod_aichatbot_get_remaining_interactions($cmid);
-            $responsetext['remainingattempts'] = mod_aichatbot_get_remaining_attempts($cmid);
-            if ($responsetext['remaininginteractions'] < 1) {
-                mod_aichatbot_set_conversation_complete($cmid, $USER->id);
+            // Success.
+            if ($success) {
+                $responsetext = $response->get_response_data();
+                echo json_encode($responsetext, JSON_PRETTY_PRINT);
+
+                // Log.
+                mod_aichatbot_log_conversation($prompttext, $responsetext['generatedcontent'], $cmid);
+
+                // Reduce remaining interactions/attempts.
+                $responsetext['remaininginteractions'] = mod_aichatbot_get_remaining_interactions($cmid);
+                $responsetext['remainingattempts'] = mod_aichatbot_get_remaining_attempts($cmid);
+                if ($responsetext['remaininginteractions'] < 1) {
+                    mod_aichatbot_set_conversation_complete($cmid, $USER->id);
+                }
+
+            // Error.
+            } else {
+                $error = $response->get_errormessage();
+                echo json_encode(['error' => $error], JSON_PRETTY_PRINT);
             }
-            print_r(json_encode($responsetext));
         }
         break;
     case 'confirmfinish':
