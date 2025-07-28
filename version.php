@@ -24,7 +24,7 @@
 $plugin->component = 'mod_aichatbot';
 $plugin->version = 2025072801;
 $plugin->requires = 2020061500;
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->release = 'alpha 2025-07-28';
+$plugin->maturity = MATURITY_STABLE;
+$plugin->release = '1.0.1';
 $plugin->supports = [404, 405];
 
