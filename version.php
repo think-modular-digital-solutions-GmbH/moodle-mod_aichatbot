@@ -22,9 +22,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 $plugin->component = 'mod_aichatbot';
-$plugin->version = 2025070201;
+$plugin->version = 2025072801;
 $plugin->requires = 2020061500;
 $plugin->maturity = MATURITY_ALPHA;
-$plugin->release = '1.0';
+$plugin->release = 'alpha 2025-07-28';
 $plugin->supports = [404, 405];
 

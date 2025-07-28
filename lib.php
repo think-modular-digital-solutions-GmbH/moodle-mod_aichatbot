@@ -30,6 +30,44 @@ use core_table\local\filter\filter;
 use core_table\local\filter\integer_filter;
 use core_table\local\filter\string_filter;
 
+/**
+ * Adds an assignment instance
+ *
+ * This is done by calling the add_instance() method of the assignment type class
+ * @param stdClass $data
+ * @param mod_assign_mod_form $form
+ * @return int The instance id of the new assignment
+ */
+function aichatbot_add_instance($data, $mform) {
+    global $DB;
+    $data->id = $DB->insert_record('aichatbot', $data);
+    return $data->id;
+}
+
+/**
+ * delete an assignment instance
+ * @param int $id
+ * @return bool
+ */
+function aichatbot_delete_instance($id) {
+    global $DB;
+
+    if (!$aichatbot = $DB->get_record('aichatbot', ['id' => $id])) {
+        return false;
+    }
+
+    // Delete the main instance.
+    $DB->delete_records('aichatbot', ['id' => $id]);
+
+    return true;
+}
+
+/**
+ * Return the list if Moodle features this module supports
+ *
+ * @param string $feature FEATURE_xx constant for requested feature
+ * @return mixed True if module supports feature, false if not, null if doesn't know or string for the module purpose.
+ */
 function aichatbot_supports($feature) {
 
     switch($feature) {
@@ -41,16 +79,31 @@ function aichatbot_supports($feature) {
             return true;
         case FEATURE_BACKUP_MOODLE2:
             return true;
-        // case FEATURE_MOD_ARCHETYPE:
-        //     return MOD_ARCHETYPE_RESOURCE;
+        case FEATURE_SHOW_DESCRIPTION:
+            return true;
         case FEATURE_COMPLETION_TRACKS_VIEWS:
             return true;
         case FEATURE_COMPLETION_HAS_RULES:
+            return true;
+        case FEATURE_MOD_PURPOSE:
+            return MOD_PURPOSE_ASSESSMENT;
+        case FEATURE_GRADE_HAS_GRADE:
             return true;
         default: return null;
     }
 }
 
+/**
+ * Add a get_coursemodule_info function in case any assignment type wants to add 'extra' information
+ * for the course (see resource).
+ *
+ * Given a course_module object, this function returns any "extra" information that may be needed
+ * when printing this activity in a course listing.  See get_array_of_activities() in course/lib.php.
+ *
+ * @param stdClass $coursemodule The coursemodule object (record).
+ * @return cached_cm_info An object on information that the courses
+ *                        will know about (most noticeably, an icon).
+ */
 function aichatbot_get_coursemodule_info($coursemodule) {
     global $DB;
 
@@ -78,25 +131,14 @@ function aichatbot_get_coursemodule_info($coursemodule) {
     return $result;
 }
 
-function aichatbot_add_instance($data, $mform) {
-    global $DB;
-    $data->id = $DB->insert_record('aichatbot', $data);
-    return $data->id;
-}
-
-function aichatbot_delete_instance($id) {
-    global $DB;
-
-    if (!$aichatbot = $DB->get_record('aichatbot', ['id' => $id])) {
-        return false;
-    }
-
-    // Delete the main instance.
-    $DB->delete_records('aichatbot', ['id' => $id]);
-
-    return true;
-}
-
+/**
+ * Update an assignment instance
+ *
+ * This is done by calling the update_instance() method of the assignment type class
+ * @param stdClass $data
+ * @param stdClass $form - unused
+ * @return object
+ */
 function aichatbot_update_instance($data, $mform) {
     global $DB;
     $data->id = $data->instance;
@@ -104,6 +146,11 @@ function aichatbot_update_instance($data, $mform) {
     return true;
 }
 
+/**
+ * Renders the chat view for the AI chatbot module.
+ *
+ * @return string HTML output for the chat interface.
+ */
 function mod_aichatbot_get_chat_view() {
 
     global $USER, $DB, $PAGE, $OUTPUT, $SESSION;
@@ -173,8 +220,14 @@ function mod_aichatbot_get_chat_view() {
     return $OUTPUT->render_from_template('mod_aichatbot/view', $context);
 }
 
+/**
+ * Returns the list of channels available for the AI chatbot.
+ *
+ * @return array An associative array of channel IDs and names.
+ */
 function mod_aichatbot_get_channels() {
-    // get active ai provider
+
+    // Get active ai provider.
     $pluginname = mod_aichatbot_get_enabled_provider();
     $classname = "aiprovider_{$pluginname}\provider";
     $classobj = new $classname();
@@ -193,6 +246,11 @@ function mod_aichatbot_get_channels() {
     return [];
 }
 
+/**
+ * Returns the name of the enabled AI provider.
+ *
+ * @return string|null The name of the enabled provider or null if none is enabled.
+ */
 function mod_aichatbot_get_enabled_provider() {
     $plugins = \core_plugin_manager::instance()->get_plugins_of_type('aiprovider');
     foreach ($plugins as $plugin) {
@@ -203,6 +261,12 @@ function mod_aichatbot_get_enabled_provider() {
     return null;
 }
 
+/**
+ * Gets the number of attempts a user has made in a specific AI chatbot instance.
+ *
+ * @param int $userid The ID of the user.
+ * @return int The number of attempts made by the user.
+ */
 function mod_aichatbot_get_user_attempts($userid, $cmid) {
     global $DB;
 
@@ -214,6 +278,12 @@ function mod_aichatbot_get_user_attempts($userid, $cmid) {
     return count($attempts);
 }
 
+/**
+ * Gets the number of remaining attempts for a user in a specific AI chatbot instance.
+ *
+ * @param int $userid The ID of the user.
+ * @return int The number of attempts remaining for the user.
+ */
 function mod_aichatbot_get_remaining_attempts($cmid = null) {
     global $USER, $DB, $PAGE, $OUTPUT;
 
@@ -233,7 +303,13 @@ function mod_aichatbot_get_remaining_attempts($cmid = null) {
     return $attemptsallowed - $attempts;
 }
 
-function mod_aichatbod_get_user_interactions($conversationid) {
+/**
+ * Gets the number of interactions a user has made in a specific AI chatbot conversation.
+ *
+ * @param int $conversationid The ID of the conversation.
+ * @return int The number of interactions made by the user in the conversation.
+ */
+function mod_aichatbot_get_user_interactions($conversationid) {
     global $DB;
 
     $interactions = $DB->get_records('aichatbot_history', [
@@ -243,6 +319,12 @@ function mod_aichatbod_get_user_interactions($conversationid) {
     return count($interactions);
 }
 
+/**
+ * Gets the number of remaining interactions for a user in a specific AI chatbot conversation.
+ *
+ * @param int $cmid The course module ID.
+ * @return int The number of interactions remaining for the user in the conversation.
+ */
 function mod_aichatbot_get_remaining_interactions($cmid = null) {
     global $USER, $DB, $PAGE, $OUTPUT;
 
@@ -258,11 +340,18 @@ function mod_aichatbot_get_remaining_interactions($cmid = null) {
     $aichatbot = $DB->get_record('aichatbot', ['id' => $cm->instance], '*', MUST_EXIST);
     $maxinteractions = $aichatbot->interactions;
     $conversationid = mod_aichatbot_get_current_conversation($cmid);
-    $interactions = mod_aichatbod_get_user_interactions($conversationid);
+    $interactions = mod_aichatbot_get_user_interactions($conversationid);
 
     return $maxinteractions - $interactions;
 }
 
+/**
+ * Logs a conversation request and response in the AI chatbot history.
+ *
+ * @param string $request The user's request to the AI chatbot.
+ * @param string $response The AI chatbot's response.
+ * @param int $cmid The course module ID.
+ */
 function mod_aichatbot_log_conversation($request, $response, $cmid) {
     global $DB, $USER;
 
@@ -276,6 +365,12 @@ function mod_aichatbot_log_conversation($request, $response, $cmid) {
     $DB->insert_record('aichatbot_history', $log);
 }
 
+/**
+ * Gets the current conversation ID for the user in a specific AI chatbot course module.
+ *
+ * @param int $cmid The course module ID.
+ * @return int|null The ID of the current conversation or null if not found.
+ */
 function mod_aichatbot_get_current_conversation($cmid) {
     global $DB, $USER;
 
@@ -286,6 +381,12 @@ function mod_aichatbot_get_current_conversation($cmid) {
     ]);
 }
 
+/**
+ * Gets the conversation history for a specific conversation ID.
+ *
+ * @param int $conversationid The ID of the conversation.
+ * @return array An array of conversation history records.
+ */
 function mod_aichatbot_get_conversation_history($conversationid) {
     global $DB;
 
@@ -298,6 +399,12 @@ function mod_aichatbot_get_conversation_history($conversationid) {
     ]);
 }
 
+/**
+ * Sets a conversation as complete for a user in a specific AI chatbot course module.
+ *
+ * @param int $cmid The course module ID.
+ * @param int $userid The ID of the user.
+ */
 function mod_aichatbot_set_conversation_complete($cmid, $userid) {
     global $DB;
 
@@ -314,6 +421,12 @@ function mod_aichatbot_set_conversation_complete($cmid, $userid) {
     }
 }
 
+/**
+ * Gets the manage dialogs view for students in the AI chatbot module.
+ *
+ * @param int $cmid The course module ID.
+ * @return string HTML output for the manage dialogs view.
+ */
 function mod_aichatbot_get_manage_dialogs_student_view($cmid) {
     global $OUTPUT;
 
@@ -351,6 +464,12 @@ function mod_aichatbot_get_manage_dialogs_student_view($cmid) {
     return $OUTPUT->render_from_template('mod_aichatbot/manage_dialogs_student', $data);
 }
 
+/**
+ * Gets the manage dialogs view for teachers in the AI chatbot module.
+ *
+ * @param int $cmid The course module ID.
+ * @return string HTML output for the manage dialogs view.
+ */
 function mod_aichatbot_get_manage_dialogs_teacher_view($cmid) {
     global $OUTPUT, $PAGE, $DB;
 
@@ -435,6 +554,12 @@ function mod_aichatbot_get_manage_dialogs_teacher_view($cmid) {
    return $OUTPUT->render_from_template('mod_aichatbot/manage_dialogs_teacher', $data);
 }
 
+/**
+ * Gets the user conversations for a specific AI chatbot course module.
+ *
+ * @param int $cmid The course module ID.
+ * @return array An array of conversation records for the user.
+ */
 function mod_aichatbot_get_user_conversations($cmid) {
     global $DB, $USER;
 
@@ -447,6 +572,13 @@ function mod_aichatbot_get_user_conversations($cmid) {
     return $conversations;
 }
 
+/**
+ * Gets the student conversations for a specific AI chatbot course module.
+ *
+ * @param int $userid The ID of the user.
+ * @param int $cmid The course module ID.
+ * @return array An array of conversation records for the user.
+ */
 function mod_aichatbot_get_student_conversations($userid, $cmid) {
     global $DB;
 
@@ -458,6 +590,13 @@ function mod_aichatbot_get_student_conversations($userid, $cmid) {
     return $conversations;
 }
 
+/**
+ * Shares a conversation for a user in a specific AI chatbot course module.
+ *
+ * @param int $conversationid The ID of the conversation to share.
+ * @param int $userid The ID of the user sharing the conversation.
+ * @param int $cmid The course module ID.
+ */
 function mod_aichatbot_share_conversation($conversationid, $userid, $cmid) {
     if (mod_aichatbot_user_has_shared_conversation($cmid)) {
         echo json_encode([
@@ -482,6 +621,13 @@ function mod_aichatbot_share_conversation($conversationid, $userid, $cmid) {
     purge_caches();
 }
 
+/**
+ * Checks if a user has access to a specific conversation in the AI chatbot module.
+ *
+ * @param int $conversationid The ID of the conversation.
+ * @param int $userid The ID of the user.
+ * @return bool True if the user has access, false otherwise.
+ */
 function mod_aichatbot_user_has_access_to_conversation($conversationid, $userid) {
     global $DB;
 
@@ -493,6 +639,12 @@ function mod_aichatbot_user_has_access_to_conversation($conversationid, $userid)
     return $conversationisavailable;
 }
 
+/**
+ * Checks if a user has shared a conversation in the AI chatbot module.
+ *
+ * @param int $cmid The course module ID.
+ * @return bool True if the user has shared a conversation, false otherwise.
+ */
 function mod_aichatbot_user_has_shared_conversation($cmid) {
 
     $conversation = mod_aichatbot_get_shared_conversation($cmid);
@@ -503,6 +655,12 @@ function mod_aichatbot_user_has_shared_conversation($cmid) {
     return false;
 }
 
+/**
+ * Gets the shared conversation for a user in a specific AI chatbot course module.
+ *
+ * @param int $cmid The course module ID.
+ * @return stdClass|null The shared conversation record or null if not found.
+ */
 function mod_aichatbot_get_shared_conversation($cmid) {
     global $DB, $USER;
 
@@ -515,6 +673,13 @@ function mod_aichatbot_get_shared_conversation($cmid) {
     return $conversation;
 }
 
+/**
+ * Toggles the public visibility of a conversation for a user in the AI chatbot module.
+ *
+ * @param int $conversationid The ID of the conversation to toggle.
+ * @param int $userid The ID of the user.
+ * @return bool True if the conversation is now public, false otherwise.
+ */
 function mod_aichatbot_toggle_conversation_public($conversationid, $userid) {
     if (mod_aichatbot_user_has_access_to_conversation($conversationid, $userid)) {
         global $DB;
@@ -532,6 +697,12 @@ function mod_aichatbot_toggle_conversation_public($conversationid, $userid) {
     }
 }
 
+/**
+ * Revokes the shared status of a conversation for a user in the AI chatbot module.
+ *
+ * @param int $conversationid The ID of the conversation to revoke sharing.
+ * @return string A message indicating the result of the operation.
+ */
 function mod_aichatbot_revoke_share($conversationid) {
     global $DB;
 
@@ -547,6 +718,12 @@ function mod_aichatbot_revoke_share($conversationid) {
     return get_string('nosubmission', 'mod_aichatbot');
 }
 
+/**
+ * Gets the comment for a specific conversation in the AI chatbot module.
+ *
+ * @param int $conversationid The ID of the conversation.
+ * @return string The comment associated with the conversation.
+ */
 function mod_aichatbot_get_comment($conversationid) {
     global $DB;
 
@@ -561,6 +738,12 @@ function mod_aichatbot_get_comment($conversationid) {
     return '';
 }
 
+/**
+ * Saves a comment for a specific conversation in the AI chatbot module.
+ *
+ * @param int $conversationid The ID of the conversation.
+ * @param string $comment The comment to save.
+ */
 function mod_aichatbot_save_comment($conversationid, $comment) {
     global $DB;
 
@@ -574,6 +757,11 @@ function mod_aichatbot_save_comment($conversationid, $comment) {
     }
 }
 
+/**
+ * Displays a no access message for the AI chatbot module.
+ *
+ * This function is called when a user tries to access the AI chatbot without the necessary permissions.
+ */
 function mod_aichatbot_no_access() {
     global $OUTPUT;
 
@@ -583,6 +771,12 @@ function mod_aichatbot_no_access() {
     return;
 }
 
+/**
+ * Displays the public dialogs for the AI chatbot module.
+ *
+ * @param int $cmid The course module ID.
+ * @return string HTML output for the public dialogs view.
+ */
 function mod_aichatbot_show_public_dialogs($cmid) {
     global $OUTPUT;
 
@@ -593,7 +787,7 @@ function mod_aichatbot_show_public_dialogs($cmid) {
             return [
                 'id' => $dialog->id,
                 'userid' => $dialog->userid,
-                'userfullname' => mod_aichatbot_get_username($dialog->userid),
+                'userfullname' => fullname(\core_user::get_user($dialog->userid)),
             ];
         }, $publicdialogs))
     ];
@@ -603,6 +797,12 @@ function mod_aichatbot_show_public_dialogs($cmid) {
     return $OUTPUT->render_from_template('mod_aichatbot/public_dialogs', $data);
 }
 
+/**
+ * Gets the public dialogs for a specific AI chatbot course module.
+ *
+ * @param int $cmid The course module ID.
+ * @return array An array of public conversation records.
+ */
 function mod_aichatbot_get_public_dialogs($cmid) {
     global $DB;
 
@@ -614,16 +814,15 @@ function mod_aichatbot_get_public_dialogs($cmid) {
     return $conversations;
 }
 
-function mod_aichatbot_get_username($id) {
-    global $DB;
-
-    $user = $DB->get_record('user', ['id' => $id]);
-    if ($user) {
-        return $user->firstname . ' ' . $user->lastname;
-    }
-    return '';
-}
-
+/**
+ * Prepares the prompt text for the AI chatbot module.
+ *
+ * This function appends the conversation history to the prompt text if available.
+ *
+ * @param string $prompttext The initial prompt text.
+ * @param int $cmid The course module ID.
+ * @return string The prepared prompt text with conversation history.
+ */
 function mod_aichatbot_prepare_prompt($prompttext, $cmid) {
     global $DB;
 
@@ -639,6 +838,16 @@ function mod_aichatbot_prepare_prompt($prompttext, $cmid) {
     return $prompttext;
 }
 
+/**
+ * Triggers the course_module_viewed event for the AI chatbot module.
+ *
+ * This function is called when a user views an AI chatbot instance.
+ *
+ * @param stdClass $aichatbot The AI chatbot instance.
+ * @param stdClass $course The course object.
+ * @param stdClass $cm The course module object.
+ * @param context $context The context of the course module.
+ */
 function mod_aichatbot_view($aichatbot, $course, $cm, $context) {
     // Trigger course_module_viewed event.
     $params = array(
@@ -657,10 +866,25 @@ function mod_aichatbot_view($aichatbot, $course, $cm, $context) {
     $completion->set_module_viewed($cm);
 }
 
+/**
+ * Checks if the completion rule for attempts is enabled.
+ *
+ * @param stdClass $data The data object containing completion settings.
+ * @return bool True if the completion rule is enabled, false otherwise.
+ */
 function aichatbot_completion_rule_enabled($data) {
     return !empty($data->completionattempts);
 }
 
+/**
+ * Removes emojis from a given text.
+ *
+ * This function uses regular expressions to remove various types of emojis,
+ * including keycap emojis and those from extended Unicode ranges.
+ *
+ * @param string $text The input text from which emojis will be removed.
+ * @return string The text with emojis removed.
+ */
 function mod_aichatbot_remove_emojis($text) {
     // Remove emoji sequences (ZWJ, variation selectors, etc.)
     $text = preg_replace('/\x{200D}|\x{FE0F}/u', '', $text);

@@ -21,18 +21,43 @@
  */
 require_once($CFG->dirroot.'/course/moodleform_mod.php');
 
+/**
+ * Mod settings form.
+ *
+ * @package   mod_aichatbot
+ * @copyright 2025 think modular <support@think-modular.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class mod_aichatbot_mod_form extends moodleform_mod {
+
+    /**
+     * Form definition.
+     *
+     * @return void
+     */
     public function definition() {
-       $channelsarray = mod_aichatbot_get_channels();
 
         $mform = $this->_form;
-        $mform->addElement('text', 'name', get_string('name'));
-        $mform->setType('name', PARAM_TEXT);
+
+        // General settings.
+        $mform->addElement('header', 'general', get_string('general', 'form'));
+
+        // Name.
+        $mform->addElement('text', 'name', get_string('name'), array('size'=>'64'));
+        if (!empty($CFG->formatstringstriptags)) {
+            $mform->setType('name', PARAM_TEXT);
+        } else {
+            $mform->setType('name', PARAM_CLEANHTML);
+        }
+        $mform->addRule('name', null, 'required', null, 'client');
+        $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
 
         $this->standard_intro_elements();
 
+        // AI chatbot settings.
         $mform->addElement('header', 'aichatbotsettings', get_string('pluginname', 'mod_aichatbot'));
         $mform->addElement('textarea', 'prompttext', get_string('prompttext', 'mod_aichatbot'), 'wrap="virtual" rows="10" cols="80"');
+        $channelsarray = mod_aichatbot_get_channels();
         if (count($channelsarray)) {
             $mform->addElement('select', 'channel', get_string('channel', 'mod_aichatbot'), $channelsarray);
             $firstoption = count($channelsarray) ? reset($channelsarray) : null;
@@ -55,6 +80,8 @@ class mod_aichatbot_mod_form extends moodleform_mod {
         $mform->addRule('interactions', null, 'required', null, 'client');
         $mform->setDefault('interactions', $maxinteractions); // Default value for interactions.
         $mform->addHelpButton('interactions', 'interactions', 'mod_aichatbot');
+
+        $this->standard_grading_coursemodule_elements();
 
         $this->standard_coursemodule_elements();
 
