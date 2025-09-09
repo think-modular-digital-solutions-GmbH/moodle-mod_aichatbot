@@ -106,3 +106,7 @@ $string['download'] = 'download';
 $string['share'] = 'share w/teacher';
 $string['makepublic'] = 'make public';
 $string['revoke'] = 'revoke';
+
+$string['studentsection'] = 'Your conversations';
+$string['teachersection'] = 'Conversations from students';
+$string['manage_dialogs'] = 'Manage dialogs';

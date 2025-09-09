@@ -71,3 +71,6 @@ $string['download'] = 'Herunterladen';
 $string['share'] = 'mit Ihrer:m Lehrenden teilen';
 $string['makepublic'] = 'im Kurs teilen';
 $string['revoke'] = 'stornieren';
+$string['studentsection'] = 'Ihre Dialoge';
+$string['teachersection'] = 'Dialoge von Teilnehmer/innen';
+$string['manage_dialogs'] = 'Dialoge verwalten';

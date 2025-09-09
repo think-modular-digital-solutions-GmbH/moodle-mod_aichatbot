@@ -21,13 +21,22 @@
  */
 
 require_once('../../config.php');
-global $DB, $PAGE, $OUTPUT, $CFG;
 
+// Get parameters
 $cmid = required_param('id', PARAM_INT); // Course module ID.
 list($course, $cm) = get_course_and_cm_from_cmid($cmid, 'aichatbot');
-require_login($course, true, $cm);
 
+// Get context
+require_login($course, true, $cm);
+$context = context_module::instance($cmid);
+
+// Setup page
 $PAGE->set_url('/mod/aichatbot/manage_dialogs.php', ['id' => $cmid]);
+$PAGE->set_title(get_string('manage_dialogs', 'mod_aichatbot'));
+$PAGE->set_heading($course->fullname);
+$PAGE->set_context($context);
+
+// Include CSS and JS
 $PAGE->requires->css('/mod/aichatbot/style.css');
 $PAGE->requires->jquery();
 $PAGE->requires->js('/mod/aichatbot/js/scripts.js');
@@ -35,12 +44,19 @@ $PAGE->requires->js('/mod/aichatbot/js/pagination.js');
 $PAGE->requires->strings_for_js(['sharedsuccess', 'publicsuccess', 'privatesuccess', 'commentupdated', 'warningfinished'], 'mod_aichatbot');
 
 echo $OUTPUT->header();
-$context = context_module::instance($cmid);
+
+// Teacher view
 if (has_capability('mod/aichatbot:manage', $context)) {
+    echo $OUTPUT->heading(get_string('teachersection', 'mod_aichatbot'), 3);
     echo mod_aichatbot_get_manage_dialogs_teacher_view($cmid);
-} else {
+}
+
+// Student view
+if (has_capability('mod/aichatbot:view', $context)) {
+    echo $OUTPUT->heading(get_string('studentsection', 'mod_aichatbot'), 3);
     echo mod_aichatbot_get_manage_dialogs_student_view($cmid);
 }
+
 $completion = new \completion_info($course);
 $completion->update_state($cm, true);
 echo $OUTPUT->footer();
