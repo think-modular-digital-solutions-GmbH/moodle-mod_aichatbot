@@ -20,6 +20,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 $string['pluginname'] = 'AI Chatbot';
+$string['aichatbot:addinstance'] = 'Add AI Chatbot activity';
+$string['aichatbot:manage'] = 'Manage AI Chatbot activity';
+$string['aichatbot:view'] = 'Manage AI Chatbot activity';
 $string['modulename'] = 'AI Chatbot';
 $string['modulenameplural'] = 'AI Chatbots';
 $string['pluginadministration'] = 'AI Chatbot Administration';
