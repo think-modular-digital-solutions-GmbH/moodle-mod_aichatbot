@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Upgrade code for the aichatbot module.
+ *
  * @package    mod_aichatbot
  * @copyright  2025 think modular <support@think-modular.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -24,9 +26,7 @@ function xmldb_aichatbot_upgrade($oldversion) {
 
     $dbman = $DB->get_manager();
 
-
     if ($oldversion < 2025051503) {
-
         // Define field completionattemptscount to be added to aichatbot.
         $table = new xmldb_table('aichatbot');
         $field = new xmldb_field('completionattemptscount', XMLDB_TYPE_INTEGER, '2', null, null, null, null, 'completionattempts');
@@ -39,7 +39,6 @@ function xmldb_aichatbot_upgrade($oldversion) {
         // Aichatbot savepoint reached.
         upgrade_mod_savepoint(true, 2025051503, 'aichatbot');
     }
-
 
     return true;
 }

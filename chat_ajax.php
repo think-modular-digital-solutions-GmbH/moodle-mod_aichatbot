@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * AJAX script to handle AI Chat Bot requests.
+ *
  * @package    mod_aichatbot
  * @copyright  2025 think modular <support@think-modular.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,7 +28,7 @@ use core_ai\aiactions\responses\response_generate_text;
 
 define('AJAX_SCRIPT', true);
 
-require(__DIR__.'/../../config.php');
+require(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
 
 $action       = optional_param('action', '', PARAM_ALPHANUM);
@@ -36,7 +38,7 @@ $cmid         = optional_param('cmid', '', PARAM_INT);
 $conversationid = optional_param('conversationid', '', PARAM_INT);
 $comment = optional_param('comment', '', PARAM_TEXT);
 
-//require_login();
+require_login();
 
 if (!confirm_sesskey()) {
     throw new moodle_exception('invalidsesskey', 'error');
@@ -46,16 +48,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     throw new moodle_exception('invalidrequest', 'error', '', null, 'Only POST requests are allowed.');
 }
 
-switch($action) {
+switch ($action) {
     case 'sendrequest':
         if (mod_aichatbot_get_remaining_interactions($cmid) < 0) {
             echo json_encode([
-                'error' => get_string('noattemptsremaining', 'mod_aichatbot')
+                'error' => get_string('noattemptsremaining', 'mod_aichatbot'),
             ]);
         } else {
             $manager = new manager();
 
-            //Checks if there is any conversation history. If not, concatenate the user input with the system prompt.
+            // Checks if there is any conversation history. If not, concatenate the user input with the system prompt.
             $finalprompt = mod_aichatbot_prepare_prompt($prompttext, $cmid);
 
             $action = new generate_text(
@@ -82,9 +84,8 @@ switch($action) {
                 if ($responsetext['remaininginteractions'] < 1) {
                     mod_aichatbot_set_conversation_complete($cmid, $USER->id);
                 }
-
-            // Error.
             } else {
+                // Error.
                 $error = $response->get_errormessage();
                 echo json_encode(['error' => $error], JSON_PRETTY_PRINT);
             }

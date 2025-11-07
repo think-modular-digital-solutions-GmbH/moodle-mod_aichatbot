@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * aichatbot backup steps
+ *
  * @package    mod_aichatbot
  * @subpackage backup-moodle2
  * @copyright  2025 think modular
@@ -29,16 +31,32 @@
  * Define the complete aichatbot structure for backup, with file and id annotations
  */
 class backup_aichatbot_activity_structure_step extends backup_activity_structure_step {
-
+    /**
+     * Define the structure of the aichatbot activity to be backed up.
+     */
     protected function define_structure() {
 
-        // To know if we are including userinfo
+        // To know if we are including userinfo.
         $userinfo = $this->get_setting_value('userinfo');
 
-        // Define each element separated
-        $aichatbot = new backup_nested_element('aichatbot', array('id'), array(
-            'name', 'timecreated', 'timemodified', 'intro', 'introformat', 'completionattempts',
-            'completionshare', 'prompttext', 'channel', 'attempts', 'interactions'));
+        // Define each element separated.
+        $aichatbot = new backup_nested_element(
+            'aichatbot',
+            ['id'],
+            [
+                'name',
+                'timecreated',
+                'timemodified',
+                'intro',
+                'introformat',
+                'completionattempts',
+                'completionshare',
+                'prompttext',
+                'channel',
+                'attempts',
+                'interactions',
+            ],
+        );
 
         // Define sources.
         $aichatbot->set_source_table('aichatbot', ['id' => backup::VAR_ACTIVITYID]);

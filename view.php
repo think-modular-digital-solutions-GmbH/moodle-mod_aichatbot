@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Entry point to the aichatbot module. All pages are rendered from here
+ *
  * @package    mod_aichatbot
  * @copyright  2025 think modular <support@think-modular.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -24,7 +26,7 @@ require_once('../../config.php');
 global $DB, $PAGE, $OUTPUT, $CFG;
 
 $id = required_param('id', PARAM_INT); // Course module ID.
-list($course, $cm) = get_course_and_cm_from_cmid($id, 'aichatbot');
+[$course, $cm] = get_course_and_cm_from_cmid($id, 'aichatbot');
 $aichatbot = $DB->get_record('aichatbot', ['id' => $cm->instance], '*', MUST_EXIST);
 require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
@@ -36,7 +38,16 @@ $PAGE->set_url('/mod/aichatbot/view.php', ['id' => $id]);
 $PAGE->requires->css('/mod/aichatbot/style.css');
 $PAGE->requires->jquery();
 $PAGE->requires->js('/mod/aichatbot/js/scripts.js');
-$PAGE->requires->strings_for_js(['sharedsuccess', 'publicsuccess', 'privatesuccess', 'commentupdated', 'warningfinished'], 'mod_aichatbot');
+$PAGE->requires->strings_for_js(
+    [
+        'sharedsuccess',
+        'publicsuccess',
+        'privatesuccess',
+        'commentupdated',
+        'warningfinished',
+    ],
+    'mod_aichatbot'
+);
 
 mod_aichatbot_view($aichatbot, $course, $cm, $context);
 $completion = new \completion_info($course);

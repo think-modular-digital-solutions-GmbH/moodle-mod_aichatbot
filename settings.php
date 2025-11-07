@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Settings for the aichatbot module
+ *
  * @package    mod_aichatbot
  * @copyright  2025 think modular <support@think-modular.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

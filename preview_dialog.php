@@ -15,12 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Preview or download a conversation as a PDF
+ *
  * @package    mod_aichatbot
  * @copyright  2025 think modular <support@think-modular.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-require_once('vendor/autoload.php'); // Make sure the path to mPDF autoload.php is correct
-require_once('../../config.php'); // Moodle config
+
+defined('MOODLE_INTERNAL') || die();
+
+require_once('vendor/autoload.php');
+require_once('../../config.php');
 require_once(__DIR__ . '/lib.php');
 
 use Mpdf\Mpdf;
@@ -43,15 +48,15 @@ $activityname = $aichatbot->name;
 
 
 $conversation = $DB->get_record('aichatbot_conversations', [
-    'id' => $conversationid
+    'id' => $conversationid,
 ]);
 
-if($conversation->ispublic) {
+if ($conversation->ispublic) {
     mod_aichatbot_show_conversation($conversation, $conversationid, $action, $activityname, $description);
-} else if(mod_aichatbot_user_has_access_to_conversation($conversationid, $USER->id)) {
+} else if (mod_aichatbot_user_has_access_to_conversation($conversationid, $USER->id)) {
     mod_aichatbot_show_conversation($conversation, $conversationid, $action, $activityname, $description);
-} else if(has_capability('mod/aichatbot:manage', $context)) {
-    if($conversation->isshared) {
+} else if (has_capability('mod/aichatbot:manage', $context)) {
+    if ($conversation->isshared) {
         mod_aichatbot_show_conversation($conversation, $conversationid, $action, $activityname, $description);
     } else {
         mod_aichatbot_no_access();
@@ -60,20 +65,32 @@ if($conversation->ispublic) {
     mod_aichatbot_no_access();
 }
 
+/**
+ * Generate and show/download the conversation as a PDF
+ *
+ * @param stdClass $conversation The conversation record
+ * @param int $conversationid The ID of the conversation
+ * @param string $action 'preview' or 'download'
+ * @param string $activityname The name of the activity
+ * @param string $description The description of the activity
+ * @return void
+ *
+ * @package mod_aichatbot
+ */
 function mod_aichatbot_show_conversation($conversation, $conversationid, $action, $activityname = '', $description = '') {
     global $DB;
 
-    // we have to get the user becuase the teachers should see the name of the user who submitted the dialog in the document
+    // We have to get the user becuase the teachers should see the name of the user who submitted the dialog in the document.
     $userid = $conversation->userid;
     $user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
 
     $conversationhistory = $DB->get_records('aichatbot_history', [
-        'conversationid' => $conversationid
+        'conversationid' => $conversationid,
     ]);
 
-    // Create new PDF document
+    // Create new PDF document.
     $pdf = new Mpdf([
-        'tempDir' => '/tmp'  // Make sure this path is correct
+        'tempDir' => '/tmp',
     ]);
 
     $pdf->SetTitle('Conversation');
@@ -81,7 +98,7 @@ function mod_aichatbot_show_conversation($conversation, $conversationid, $action
     $switch = true;
 
     foreach ($conversationhistory as $c) {
-        $timestamp = userdate($c->timestamp, '%d %b %Y, %H:%M'); // Format the timestamp
+        $timestamp = userdate($c->timestamp, '%d %b %Y, %H:%M');
 
         if ($switch) {
             $html = '<h2 style="margin-bottom: 0px; font-family: Lucida Console; color:rgb(56, 56, 56);">' . mod_aichatbot_remove_emojis($activityname) . '</h2>';
@@ -118,10 +135,10 @@ function mod_aichatbot_show_conversation($conversation, $conversationid, $action
         }
     }
 
-    // Close the main div
+    // Close the main div.
     $html .= '</div>';
 
-    // Write HTML to the PDF
+    // Write HTML to the PDF.
     $pdf->WriteHTML($html);
 
     if ($action == 'preview') {

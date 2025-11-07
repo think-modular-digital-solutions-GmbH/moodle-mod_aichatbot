@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Custom completion rules for the aichatbot activity.
+ *
  * @package    mod_aichatbot
  * @copyright  2025 think modular <support@think-modular.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -34,7 +36,6 @@ use core_completion\activity_custom_completion;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class custom_completion extends activity_custom_completion {
-
     /**
      * Fetches the completion state for a given completion rule.
      *
@@ -68,7 +69,7 @@ class custom_completion extends activity_custom_completion {
                 $shared = $DB->record_exists('aichatbot_conversations', [
                     'userid' => $userid,
                     'isshared' => 1,
-                    'instanceid' => $cm->id
+                    'instanceid' => $cm->id,
                 ]);
                 return $shared ? COMPLETION_COMPLETE : COMPLETION_INCOMPLETE;
             default:
@@ -96,8 +97,12 @@ class custom_completion extends activity_custom_completion {
         $aichatbot = $DB->get_record('aichatbot', ['id' => $this->cm->instance], '*', MUST_EXIST);
 
         return [
-            'completionattempts' => get_string('completiondetail:attempts', 'aichatbot', ['attempts' => $aichatbot->completionattemptscount]),
-            'completionshare' => get_string('completiondetail:share', 'aichatbot')
+            'completionattempts' => get_string(
+                'completiondetail:attempts',
+                'aichatbot',
+                ['attempts' => $aichatbot->completionattemptscount]
+            ),
+            'completionshare' => get_string('completiondetail:share', 'aichatbot'),
         ];
     }
 
@@ -111,8 +116,6 @@ class custom_completion extends activity_custom_completion {
             'completionview',
             'completionattempts',
             'completionshare',
-            // 'completionusegrade',
-            // 'completionpassgrade',
         ];
     }
 }

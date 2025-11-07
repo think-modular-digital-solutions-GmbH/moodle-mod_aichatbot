@@ -21,6 +21,9 @@
  * @copyright  2025 think modular <support@think-modular.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+defined('MOODLE_INTERNAL') || die();
+
 $plugin->component = 'mod_aichatbot';
 $plugin->maturity = MATURITY_STABLE;
 
@@ -29,5 +32,3 @@ $plugin->supports = [404, 405];
 
 $plugin->version = 2025090901;
 $plugin->release = '1.0.2';
-
-

@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Library of functions and constants for module aichatbot
+ *
  * @package    mod_aichatbot
  * @copyright  2025 think modular <support@think-modular.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,7 +27,6 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\RequestOptions;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
-
 use core_table\local\filter\filter;
 use core_table\local\filter\integer_filter;
 use core_table\local\filter\string_filter;
@@ -69,8 +70,7 @@ function aichatbot_delete_instance($id) {
  * @return mixed True if module supports feature, false if not, null if doesn't know or string for the module purpose.
  */
 function aichatbot_supports($feature) {
-
-    switch($feature) {
+    switch ($feature) {
         case FEATURE_GROUPS:
             return true;
         case FEATURE_GROUPINGS:
@@ -89,7 +89,8 @@ function aichatbot_supports($feature) {
             return MOD_PURPOSE_ASSESSMENT;
         case FEATURE_GRADE_HAS_GRADE:
             return true;
-        default: return null;
+        default:
+            return null;
     }
 }
 
@@ -158,13 +159,13 @@ function mod_aichatbot_get_chat_view() {
     $cmid = $PAGE->cm->id;
 
     if (mod_aichatbot_get_remaining_attempts() < 1) {
-        $allCompleted = !$DB->record_exists('aichatbot_conversations', ['userid' => $USER->id, 'finished' => 0, 'instanceid' => $cmid]);
+        $alldone = !$DB->record_exists('aichatbot_conversations', ['userid' => $USER->id, 'finished' => 0, 'instanceid' => $cmid]);
 
         $data = [
             'finishbuttondisabled' => true,
             'cmid' => $cmid,
         ];
-        if($allCompleted) {
+        if ($alldone) {
             return $OUTPUT->render_from_template('mod_aichatbot/noattempts', $data);
         }
     }
@@ -179,7 +180,7 @@ function mod_aichatbot_get_chat_view() {
         $cm = get_coursemodule_from_id('aichatbot', $cmid, 0, false, MUST_EXIST);
         $aichatbot = $DB->get_record('aichatbot', ['id' => $cm->instance], '*', MUST_EXIST);
 
-        if(mod_aichatbot_get_user_attempts($USER->id, $cmid) === $aichatbot->attempts) {
+        if (mod_aichatbot_get_user_attempts($USER->id, $cmid) === $aichatbot->attempts) {
             return $OUTPUT->render_from_template('mod_aichatbot/noattempts', $data);
         } else {
             $conversation = new stdClass();
@@ -272,7 +273,7 @@ function mod_aichatbot_get_user_attempts($userid, $cmid) {
 
     $attempts = $DB->get_records('aichatbot_conversations', [
         'userid' => $userid,
-        'instanceid' => $cmid
+        'instanceid' => $cmid,
     ]);
 
     return count($attempts);
@@ -313,7 +314,7 @@ function mod_aichatbot_get_user_interactions($conversationid) {
     global $DB;
 
     $interactions = $DB->get_records('aichatbot_history', [
-        'conversationid' => $conversationid
+        'conversationid' => $conversationid,
     ]);
 
     return count($interactions);
@@ -377,7 +378,7 @@ function mod_aichatbot_get_current_conversation($cmid) {
     return $DB->get_field('aichatbot_conversations', 'id', [
         'userid' => $USER->id,
         'instanceid' => $cmid,
-        'finished' => 0
+        'finished' => 0,
     ]);
 }
 
@@ -391,11 +392,11 @@ function mod_aichatbot_get_conversation_history($conversationid) {
     global $DB;
 
     $conversationhistory = $DB->get_records('aichatbot_history', [
-        'conversationid' => $conversationid
+        'conversationid' => $conversationid,
     ]);
 
     return $DB->get_records('aichatbot_history', [
-        'conversationid' => $conversationid
+        'conversationid' => $conversationid,
     ]);
 }
 
@@ -411,7 +412,7 @@ function mod_aichatbot_set_conversation_complete($cmid, $userid) {
     $conversation = $DB->get_record('aichatbot_conversations', [
         'userid' => $userid,
         'instanceid' => $cmid,
-        'finished' => 0
+        'finished' => 0,
     ]);
 
     if ($conversation) {
@@ -499,20 +500,20 @@ function mod_aichatbot_get_manage_dialogs_teacher_view($cmid) {
         "usebutton" => true,
         "buttoncontent" => get_string('initalsdropdown', 'mod_aichatbot'),
         "dropdowncontent" => $initialselector->export_for_template($OUTPUT)['dropdowncontent'],
-        "instance" => $cmid
+        "instance" => $cmid,
     ];
 
     $context = context_course::instance($course->id);
-    $roleid = 5; // student role
+    $roleid = 5; // Student role.
     $students = get_role_users($roleid, $context);
 
     if (!empty($firstnameinitial) || !empty($lastnameinitial)) {
         $filteredstudents = [];
         foreach ($students as $student) {
-            $firstnameMatch = empty($firstnameinitial) || stripos($student->firstname, $firstnameinitial) === 0;
-            $lastnameMatch = empty($lastnameinitial) || stripos($student->lastname, $lastnameinitial) === 0;
+            $firstnamematch = empty($firstnameinitial) || stripos($student->firstname, $firstnameinitial) === 0;
+            $lastnamematch = empty($lastnameinitial) || stripos($student->lastname, $lastnameinitial) === 0;
 
-            if ($firstnameMatch && $lastnameMatch) {
+            if ($firstnamematch && $lastnamematch) {
                 $filteredstudents[] = $student;
             }
         }
@@ -529,14 +530,14 @@ function mod_aichatbot_get_manage_dialogs_teacher_view($cmid) {
                     'id' => $conversation->id,
                     'isshared' => $conversation->isshared,
                     'comment' => $conversation->comment,
-                    'lastmodified' => userdate($conversation->updated), // Replace with actual value if needed
+                    'lastmodified' => userdate($conversation->updated),
                     'userfullname' => $student->firstname . ' ' . $student->lastname,
                     'useremail' => $student->email,
                 ];
                 $data['conversations'][] = $conversationdata;
 
                 $sharedfound = true;
-                break; // Move to next student
+                break;
             }
         }
 
@@ -551,7 +552,7 @@ function mod_aichatbot_get_manage_dialogs_teacher_view($cmid) {
 
     $data['cmid'] = $cmid;
 
-   return $OUTPUT->render_from_template('mod_aichatbot/manage_dialogs_teacher', $data);
+    return $OUTPUT->render_from_template('mod_aichatbot/manage_dialogs_teacher', $data);
 }
 
 /**
@@ -600,7 +601,7 @@ function mod_aichatbot_get_student_conversations($userid, $cmid) {
 function mod_aichatbot_share_conversation($conversationid, $userid, $cmid) {
     if (mod_aichatbot_user_has_shared_conversation($cmid)) {
         echo json_encode([
-            'error' => get_string('alreadyshared', 'mod_aichatbot')
+            'error' => get_string('alreadyshared', 'mod_aichatbot'),
         ]);
         return;
     }
@@ -707,7 +708,7 @@ function mod_aichatbot_revoke_share($conversationid) {
     global $DB;
 
     $conversation = $DB->get_record('aichatbot_conversations', [
-        'id' => $conversationid
+        'id' => $conversationid,
     ]);
 
     if ($conversation) {
@@ -728,7 +729,7 @@ function mod_aichatbot_get_comment($conversationid) {
     global $DB;
 
     $conversation = $DB->get_record('aichatbot_conversations', [
-        'id' => $conversationid
+        'id' => $conversationid,
     ]);
 
     if ($conversation) {
@@ -748,7 +749,7 @@ function mod_aichatbot_save_comment($conversationid, $comment) {
     global $DB;
 
     $conversation = $DB->get_record('aichatbot_conversations', [
-        'id' => $conversationid
+        'id' => $conversationid,
     ]);
 
     if ($conversation) {
@@ -783,13 +784,13 @@ function mod_aichatbot_show_public_dialogs($cmid) {
     $publicdialogs = mod_aichatbot_get_public_dialogs($cmid);
 
     $data = [
-        'conversations' => array_values(array_map(function($dialog) {
+        'conversations' => array_values(array_map(function ($dialog) {
             return [
                 'id' => $dialog->id,
                 'userid' => $dialog->userid,
                 'userfullname' => fullname(\core_user::get_user($dialog->userid)),
             ];
-        }, $publicdialogs))
+        }, $publicdialogs)),
     ];
 
     $data['cmid'] = $cmid;
@@ -808,7 +809,7 @@ function mod_aichatbot_get_public_dialogs($cmid) {
 
     $conversations = $DB->get_records('aichatbot_conversations', [
         'instanceid' => $cmid,
-        'ispublic' => 1
+        'ispublic' => 1,
     ]);
 
     return $conversations;
@@ -850,10 +851,10 @@ function mod_aichatbot_prepare_prompt($prompttext, $cmid) {
  */
 function mod_aichatbot_view($aichatbot, $course, $cm, $context) {
     // Trigger course_module_viewed event.
-    $params = array(
+    $params = [
         'context' => $context,
-        'objectid' => $aichatbot->id
-    );
+        'objectid' => $aichatbot->id,
+    ];
 
     $event = \mod_aichatbot\event\course_module_viewed::create($params);
     $event->add_record_snapshot('course_modules', $cm);
@@ -886,15 +887,15 @@ function aichatbot_completion_rule_enabled($data) {
  * @return string The text with emojis removed.
  */
 function mod_aichatbot_remove_emojis($text) {
-    // Remove emoji sequences (ZWJ, variation selectors, etc.)
+    // Remove emoji sequences (ZWJ, variation selectors, etc.).
     $text = preg_replace('/\x{200D}|\x{FE0F}/u', '', $text);
 
-    // Remove keycap emojis like 1️⃣ 2️⃣ 3️⃣
+    // Remove keycap emojis like 1️⃣ 2️⃣ 3️⃣.
     $text = preg_replace('/[0-9]\x{20E3}/u', '', $text);
 
-    // Remove emojis from extended Unicode ranges
+    // Remove emojis from extended Unicode ranges.
     $text = preg_replace('/[\x{1F000}-\x{1FFFF}]/u', '', $text);
-    $text = preg_replace('/[\x{2100}-\x{27BF}]/u', '', $text); // Symbols, Dingbats
+    $text = preg_replace('/[\x{2100}-\x{27BF}]/u', '', $text);
 
     return $text;
 }

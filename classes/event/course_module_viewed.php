@@ -24,8 +24,6 @@
 
 namespace mod_aichatbot\event;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * The mod_aichatbot course module viewed event class.
  *
@@ -35,13 +33,20 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_module_viewed extends \core\event\course_module_viewed {
+    /**
+     * Init method.
+     */
     protected function init() {
         $this->data['crud'] = 'r';
         $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
         $this->data['objecttable'] = 'aichatbot';
     }
-
+    /**
+     * Returns the mapping for the objectid field.
+     *
+     * @return array
+     */
     public static function get_objectid_mapping() {
-        return array('db' => 'aichatbot', 'restore' => 'aichatbot');
+        return ['db' => 'aichatbot', 'restore' => 'aichatbot'];
     }
 }

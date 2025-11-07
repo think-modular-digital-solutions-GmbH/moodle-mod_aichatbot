@@ -31,7 +31,6 @@ require_once($CFG->dirroot . '/mod/aichatbot/backup/moodle2/backup_aichatbot_ste
  * Provides the steps to perform one complete backup of the aichatbot instance
  */
 class backup_aichatbot_activity_task extends backup_activity_task {
-
     /**
      * No specific settings for this activity
      */
@@ -51,18 +50,18 @@ class backup_aichatbot_activity_task extends backup_activity_task {
      * @param string $content some HTML text that eventually contains URLs to the activity instance scripts
      * @return string the content with the URLs encoded
      */
-    static public function encode_content_links($content) {
+    public static function encode_content_links($content) {
         global $CFG;
 
         $base = preg_quote($CFG->wwwroot, "/");
 
-        // Link to the list of aichatbots
-        $search="/(".$base."\/mod\/aichatbot\/index.php\?id\=)([0-9]+)/";
-        $content= preg_replace($search, '$@AICHATBOTINDEX*$2@$', $content);
+        // Link to the list of aichatbots.
+        $search = "/(" . $base . "\/mod\/aichatbot\/index.php\?id\=)([0-9]+)/";
+        $content = preg_replace($search, '$@AICHATBOTINDEX*$2@$', $content);
 
-        // Link to aichatbot view by moduleid
-        $search="/(".$base."\/mod\/aichatbot\/view.php\?id\=)([0-9]+)/";
-        $content= preg_replace($search, '$@AICHATBOTVIEWBYID*$2@$', $content);
+        // Link to aichatbot view by moduleid.
+        $search = "/(" . $base . "\/mod\/aichatbot\/view.php\?id\=)([0-9]+)/";
+        $content = preg_replace($search, '$@AICHATBOTVIEWBYID*$2@$', $content);
 
         return $content;
     }

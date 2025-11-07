@@ -22,19 +22,20 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die;
-
 /**
  * Structure step to restore one aichatbot activity
  */
 class restore_aichatbot_activity_structure_step extends restore_activity_structure_step {
-
+    /**
+     * Define the structure of the aichatbot activity to be restored
+     * @return restore_path_element[] array of path elements
+     */
     protected function define_structure() {
-        $paths = array();
+        $paths = [];
 
         $paths[] = new restore_path_element('aichatbot', '/activity/aichatbot');
 
-        // Return the paths wrapped into standard activity structure
+        // Return the paths wrapped into standard activity structure.
         return $this->prepare_activity_structure($paths);
     }
 
@@ -56,8 +57,10 @@ class restore_aichatbot_activity_structure_step extends restore_activity_structu
         $this->apply_activity_instance($newitemid);
     }
 
+    /**
+     * After execute actions
+     */
     protected function after_execute() {
-        // Add aichatbot related files, no need to match by itemname (just internally handled context)
-        //$this->add_related_files('mod_aichatbot', 'intro', null);
+        // Add aichatbot related files, no need to match by itemname (just internally handled context).
     }
 }
