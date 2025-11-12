@@ -23,6 +23,8 @@
  */
 require_once('../../config.php');
 
+use mod_aichatbot\aichatbot;
+
 global $DB, $PAGE, $OUTPUT;
 
 $cmid = required_param('cmid', PARAM_INT);
@@ -45,5 +47,5 @@ $PAGE->requires->strings_for_js(
 );
 
 echo $OUTPUT->header();
-echo mod_aichatbot_show_public_dialogs($cmid);
+echo aichatbot::show_public_dialogs($cmid);
 echo $OUTPUT->footer();

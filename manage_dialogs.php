@@ -24,6 +24,8 @@
 
 require_once('../../config.php');
 
+use mod_aichatbot\aichatbot;
+
 // Get parameters.
 $cmid = required_param('id', PARAM_INT); // Course module ID.
 [$course, $cm] = get_course_and_cm_from_cmid($cmid, 'aichatbot');
@@ -59,13 +61,13 @@ echo $OUTPUT->header();
 // Teacher view.
 if (has_capability('mod/aichatbot:manage', $context)) {
     echo $OUTPUT->heading(get_string('teachersection', 'mod_aichatbot'), 3);
-    echo mod_aichatbot_get_manage_dialogs_teacher_view($cmid);
+    echo aichatbot::get_manage_dialogs_teacher_view($cmid);
 }
 
 // Student view.
 if (has_capability('mod/aichatbot:view', $context)) {
     echo $OUTPUT->heading(get_string('studentsection', 'mod_aichatbot'), 3);
-    echo mod_aichatbot_get_manage_dialogs_student_view($cmid);
+    echo aichatbot::get_manage_dialogs_student_view($cmid);
 }
 
 $completion = new \completion_info($course);

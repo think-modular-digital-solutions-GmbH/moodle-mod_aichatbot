@@ -25,6 +25,8 @@
 use core_ai\manager;
 use core_ai\aiactions\generate_text;
 use core_ai\aiactions\responses\response_generate_text;
+use moodle_exception;
+use mod_aichatbot\aichatbot;
 
 define('AJAX_SCRIPT', true);
 
@@ -50,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 switch ($action) {
     case 'sendrequest':
-        if (mod_aichatbot_get_remaining_interactions($cmid) < 0) {
+        if (aichatbot::get_remaining_interactions($cmid) < 0) {
             echo json_encode([
                 'error' => get_string('noattemptsremaining', 'mod_aichatbot'),
             ]);
@@ -58,7 +60,7 @@ switch ($action) {
             $manager = new manager();
 
             // Checks if there is any conversation history. If not, concatenate the user input with the system prompt.
-            $finalprompt = mod_aichatbot_prepare_prompt($prompttext, $cmid);
+            $finalprompt = aichatbot::prepare_prompt($prompttext, $cmid);
 
             $action = new generate_text(
                 contextid: $contextid,
@@ -76,13 +78,13 @@ switch ($action) {
                 echo json_encode($responsetext, JSON_PRETTY_PRINT);
 
                 // Log.
-                mod_aichatbot_log_conversation($prompttext, $responsetext['generatedcontent'], $cmid);
+                aichatbot::log_conversation($prompttext, $responsetext['generatedcontent'], $cmid);
 
                 // Reduce remaining interactions/attempts.
-                $responsetext['remaininginteractions'] = mod_aichatbot_get_remaining_interactions($cmid);
-                $responsetext['remainingattempts'] = mod_aichatbot_get_remaining_attempts($cmid);
+                $responsetext['remaininginteractions'] = aichatbot::get_remaining_interactions($cmid);
+                $responsetext['remainingattempts'] = aichatbot::get_remaining_attempts($cmid);
                 if ($responsetext['remaininginteractions'] < 1) {
-                    mod_aichatbot_set_conversation_complete($cmid, $USER->id);
+                    aichatbot::set_conversation_complete($cmid, $USER->id);
                 }
             } else {
                 // Error.
@@ -95,19 +97,19 @@ switch ($action) {
         mod_aichatbot_set_conversation_complete($cmid, $USER->id);
         break;
     case 'shareconversation':
-        mod_aichatbot_share_conversation($conversationid, $USER->id, $cmid);
+        aichatbot::share_conversation($conversationid, $USER->id, $cmid);
         break;
     case 'togglepublic':
-        echo mod_aichatbot_toggle_conversation_public($conversationid, $USER->id);
+        echo aichatbot::toggle_conversation_public($conversationid, $USER->id);
         break;
     case 'revokeshare':
-        echo mod_aichatbot_revoke_share($conversationid);
+        echo aichatbot::revoke_share($conversationid);
         break;
     case 'getcomment':
-        echo mod_aichatbot_get_comment($conversationid);
+        echo aichatbot::get_comment($conversationid);
         break;
     case 'savecomment':
-        mod_aichatbot_save_comment($conversationid, $comment);
+        aichatbot::save_comment($conversationid, $comment);
         break;
     default:
         throw new moodle_exception('invalidaction', 'error');

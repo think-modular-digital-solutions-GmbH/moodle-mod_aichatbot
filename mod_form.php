@@ -26,6 +26,8 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/course/moodleform_mod.php');
 
+use mod_aichatbot\aichatbot;
+
 /**
  * Mod settings form.
  *
@@ -75,7 +77,7 @@ class mod_aichatbot_mod_form extends moodleform_mod {
             get_string('prompttext', 'mod_aichatbot'),
             'wrap="virtual" rows="10" cols="80"'
         );
-        $channelsarray = mod_aichatbot_get_channels();
+        $channelsarray = aichatbot::get_channels();
         if (count($channelsarray)) {
             $mform->addElement('select', 'channel', get_string('channel', 'mod_aichatbot'), $channelsarray);
             $firstoption = count($channelsarray) ? reset($channelsarray) : null;

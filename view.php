@@ -23,17 +23,22 @@
  */
 
 require_once('../../config.php');
+
+use mod_aichatbot\aichatbot;
+
 global $DB, $PAGE, $OUTPUT, $CFG;
 
+// Parameters.
 $id = required_param('id', PARAM_INT); // Course module ID.
 [$course, $cm] = get_course_and_cm_from_cmid($id, 'aichatbot');
 $aichatbot = $DB->get_record('aichatbot', ['id' => $cm->instance], '*', MUST_EXIST);
+
+// Permissions.
 require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
-
 require_capability('mod/aichatbot:view', $context);
 
-
+// Page setup.
 $PAGE->set_url('/mod/aichatbot/view.php', ['id' => $id]);
 $PAGE->requires->css('/mod/aichatbot/style.css');
 $PAGE->requires->jquery();
@@ -49,10 +54,10 @@ $PAGE->requires->strings_for_js(
     'mod_aichatbot'
 );
 
-mod_aichatbot_view($aichatbot, $course, $cm, $context);
-$completion = new \completion_info($course);
-$completion->update_state($cm, true);
+// Log the view.
+aichatbot::log_view($aichatbot, $course, $cm, $context);
 
+// Output.
 echo $OUTPUT->header();
-echo mod_aichatbot_get_chat_view();
+echo aichatbot::get_chat_view();
 echo $OUTPUT->footer();
