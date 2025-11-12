@@ -22,32 +22,31 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+require_once('../../config.php');
+require_once($CFG->libdir . '/pdflib.php');
+
 defined('MOODLE_INTERNAL') || die();
 
-require_once('vendor/autoload.php');
-require_once('../../config.php');
-require_once(__DIR__ . '/lib.php');
-
-use Mpdf\Mpdf;
 use mod_aichatbot\aichatbot;
 
 global $DB, $USER, $PAGE;
 
+// Get parameters.
 $action = required_param('action', PARAM_ALPHANUM);
 $conversationid = required_param('cid', PARAM_INT);
 $cmid = required_param('cmid', PARAM_INT); // Course module ID.
 
+// Permissions and page setup.
 require_login();
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url('/mod/aichatbot/view.php', ['cid' => $conversationid, 'action' => $action]);
 $context = context_module::instance($cmid);
 
+// Get activity name and description.
 $cm = get_coursemodule_from_id('aichatbot', $cmid, 0, false, MUST_EXIST);
 $aichatbot = $DB->get_record('aichatbot', ['id' => $cm->instance], '*', MUST_EXIST);
 $description = $aichatbot->intro;
 $activityname = $aichatbot->name;
-
-
 $conversation = $DB->get_record('aichatbot_conversations', [
     'id' => $conversationid,
 ]);
@@ -90,61 +89,115 @@ function mod_aichatbot_show_conversation($conversation, $conversationid, $action
     ]);
 
     // Create new PDF document.
-    $pdf = new Mpdf([
-        'tempDir' => '/tmp',
-    ]);
-
+    $pdf = new pdf();
     $pdf->SetTitle('Conversation');
     $username = fullname($user);
-    $switch = true;
+    $pdf->SetAuthor($username);
+    $pdf->SetFont('freesans', '', 12);
+    $header = true;
+
+    // Add styles and start main div.
+    // Because Moodle's PDF library uses TCPDF which has limited CSS support, we have to use inline styles and tables for layout.
+    $html = '<style>
+        h2.activityname {
+            margin-bottom: 0;
+            color:rgb(56, 56, 56);
+        }
+        .description {
+            margin-bottom: 20px
+        }
+        .spacer {
+            margin-bottom: 10px;
+        }
+        .submittedby h5{
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .username {
+            text-align: right;
+            font-size: 8pt;
+            color: gray;
+            margin-top: 10px;
+        }
+        .botname {
+            text-align: left;
+            font-size: 8pt;
+            color: gray;
+            margin-top: 10px;
+        }
+        .chat-text {
+            margin: 10px;
+        }
+    </style>';
 
     foreach ($conversationhistory as $c) {
         $timestamp = userdate($c->timestamp, '%d %b %Y, %H:%M');
 
-        if ($switch) {
-            $html = '<h2 style="margin-bottom: 0px; font-family: Lucida Console; color:rgb(56, 56, 56);">' . aichatbot::remove_emojis($activityname) . '</h2>';
+        if ($header) {
+            $html .= '<h2 class="activityname">' . aichatbot::remove_emojis($activityname) . '</h2>';
             if (!empty($description)) {
-                $html .= '<div style="margin-bottom: 20px; font-family: Lucida Console;">' . aichatbot::remove_emojis($description) . '</div>';
+                $html .= '<div class="description">' . aichatbot::remove_emojis($description) . '</div>';
             }
-            $html .= '<div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 8px; font-family: Lucida Console; border: 1px solid #dde2eb;">';
-            $html .= '<h5 style="text-align: center; margin-bottom: 30px;">' . get_string('submittedby', 'mod_aichatbot') . $username . ' ' . $timestamp . '</h5>';
-            $switch = false;
+            $html .= '<div class="submittedby">';
+            $html .= '<h5>' . get_string('submittedby', 'mod_aichatbot') . $username . ' ' . $timestamp . '</h5>';
+            $html .= '<hr><div class="spacer">&nbsp;</div>';
+            $header = false;
         }
 
         if (!empty($c->request)) {
             $message = nl2br(htmlspecialchars($c->request));
             $message = aichatbot::remove_emojis($message);
-            $html .= <<<EOD
-            <div style="text-align: right;">
-                <span style="font-size: 8pt; color: gray;">$username</span>
-            </div>
-            <div style="background-color: #0078FF; color: white; padding: 10px; margin: 10px 0 20px 0; border-radius: 8px 0 8px 8px; align-self: flex-start; max-width: 80%; text-align: right;">
-                $message
-            </div>
-    EOD;
+            $html .= '<div class="username">' . $username . '</div>';
+
+            // Outer table gives left margin.
+            $html .= '
+            <table cellpadding="0" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td width="10%">&nbsp;</td>
+                <td width="90%">
+                <table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#0078FF">
+                    <tr>
+                    <td style="color:white;">' . $message . '</td>
+                    </tr>
+                </table>
+                </td>
+            </tr>
+            </table>';
+            $html .= '<div class="spacer">&nbsp;</div>';
         }
 
         if (!empty($c->response)) {
             $message = nl2br(htmlspecialchars($c->response));
             $message = aichatbot::remove_emojis($message);
-            $html .= <<<EOD
-            <span style="font-size: 8pt; color: gray;">Bot</span>
-            <div style="background-color: #dde2eb; padding: 10px; margin: 10px 0; border-radius: 0 8px 8px 8px; align-self: flex-end; max-width: 80%;">
-                $message
-            </div>
-    EOD;
+            $html .= '<div class="botname">Bot</div>';
+
+            // Outer table gives right margin.
+            $html .= '
+            <table cellpadding="0" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td width="90%">
+                <table cellpadding="8" cellspacing="0" border="0" width="100%" bgcolor="#dde2eb">
+                    <tr>
+                    <td style="color:black;">' . $message . '</td>
+                    </tr>
+                </table>
+                </td>
+                <td width="10%">&nbsp;</td>
+            </tr>
+            </table>';
+            $html .= '<div class="spacer">&nbsp;</div>';
         }
     }
 
-    // Close the main div.
-    $html .= '</div>';
-
     // Write HTML to the PDF.
+    $pdf->AddPage();
     $pdf->WriteHTML($html);
 
+    // Output the PDF.
+    $filename = $activityname . '_conversation_' . $conversationid . '.pdf';
     if ($action == 'preview') {
-        $pdf->Output('conversation.pdf', 'I');
+        $pdf->Output($filename, 'I');
     } else if ($action == 'download') {
-        $pdf->Output('conversation.pdf', 'D');
+        $pdf->Output($filename, 'D');
     }
 }

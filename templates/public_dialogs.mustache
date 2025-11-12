@@ -15,8 +15,8 @@
             <tr data-conversation-id={{id}}>
                 <td scope="row" class="text-center">{{userfullname}}</td>
                 <td scope="row" class="text-center">
-                    <a href="{{config.wwwroot}}/mod/aichatbot/preview_dialog.php?action=preview&cid={{id}}&cmid={{cmid}}" class="btn btn-outline-dark aichatbot-preview-button"><i class="fa-regular fa-file-pdf"></i></a>
-                    <a href="{{config.wwwroot}}/mod/aichatbot/preview_dialog.php?action=download&cid={{id}}&cmid={{cmid}}" class="btn btn-outline-dark aichatbot-download-button"><i class="fa-solid fa-download"></i></a>
+                    <a href="{{config.wwwroot}}/mod/aichatbot/preview_dialog.php?action=preview&cid={{id}}&cmid={{cmid}}" class="btn btn-outline-dark aichatbot-preview-button" target="_blank"><i class="fa-regular fa-file-pdf"></i></a>
+                    <a href="{{config.wwwroot}}/mod/aichatbot/preview_dialog.php?action=download&cid={{id}}&cmid={{cmid}}" class="btn btn-outline-dark aichatbot-download-button" target="_blank"><i class="fa-solid fa-download"></i></a>
                 </td>
             </tr>
         {{/conversations}}

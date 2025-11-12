@@ -10,6 +10,7 @@
 namespace mod_aichatbot;
 
 use context;
+use context_course;
 use completion_info;
 use stdClass;
 use mod_aichatbot\event\course_module_viewed;
@@ -533,7 +534,7 @@ class aichatbot {
     public static function show_public_dialogs($cmid) {
         global $OUTPUT;
 
-        $publicdialogs = mod_aichatbot_get_public_dialogs($cmid);
+        $publicdialogs = self::get_public_dialogs($cmid);
 
         $data = [
             'conversations' => array_values(array_map(function ($dialog) {

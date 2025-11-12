@@ -20,8 +20,8 @@
                 {{#isshared}}
                     <td scope="row" class="text-center">{{#str}}attemptshared, mod_aichatbot{{/str}}</td>
                     <td scope="row" class="text-center">
-                        <a href="{{config.wwwroot}}/mod/aichatbot/preview_dialog.php?action=preview&cid={{id}}&cmid={{cmid}}" class="btn btn-outline-dark aichatbot-preview-button"><i class="fa-regular fa-file-pdf"></i></a>
-                        <a href="{{config.wwwroot}}/mod/aichatbot/preview_dialog.php?action=download&cid={{id}}&cmid={{cmid}}" class="btn btn-outline-dark aichatbot-download-button"><i class="fa-solid fa-download"></i></a>
+                        <a href="{{config.wwwroot}}/mod/aichatbot/preview_dialog.php?action=preview&cid={{id}}&cmid={{cmid}}" class="btn btn-outline-dark aichatbot-preview-button" target="_blank"><i class="fa-regular fa-file-pdf"></i></a>
+                        <a href="{{config.wwwroot}}/mod/aichatbot/preview_dialog.php?action=download&cid={{id}}&cmid={{cmid}}" class="btn btn-outline-dark aichatbot-download-button" target="_blank"><i class="fa-solid fa-download"></i></a>
                         <button type="button" class="btn btn-outline-dark aichatbot-revoke-button" data-toggle="modal" data-target="#revokeModal"><i class="fa-solid fa-close"></i></button>
                     </td>
                     <td scope="row" class="text-center">{{lastmodified}}</td>
@@ -49,7 +49,7 @@
 <nav>
   <ul id="pagination" class="pagination"></ul>
 </nav>
-<div id="aichatbot-table-legend">
+<div class="mb-3" id="aichatbot-table-legend">
     <small>
         <i class="fa-regular fa-file-pdf"></i>: {{#str}}preview, mod_aichatbot{{/str}}<br>
         <i class="fa-solid fa-download"></i>: {{#str}}download, mod_aichatbot{{/str}}<br>
