@@ -27,6 +27,7 @@ $(document).ready(function() {
     const warningfinished = M.util.get_string('warningfinished', 'mod_aichatbot');
 
     let remaininginteractions = $('#aichatbot-remaining-interactions').val();
+
     if (remaininginteractions < 1) {
         $sendButton.prop('disabled', true);
         $sendButton.addClass('disabled');
@@ -84,16 +85,20 @@ $(document).ready(function() {
                     $chatWindow.scrollTop($chatWindow[0].scrollHeight);
                 },
                 success : function(i, r) {
-                    let response = JSON.parse(r.responseText)['generatedcontent'];
-                    if (response == null) {
+                    let response = JSON.parse(r.responseText);
+                    let text = response['generatedcontent']
+                    if (text == null) {
                         console.warn(r.responseText);
                     }
                     $responseDiv = $('<div>', {class: 'ai-chat-message message-chatbot bg-dark text-white'} );
                     spinner.remove();
                     $chatWindow.append($responseDiv);
-                    $responseDiv.text(response);
-                    $("#aichatbot-send-button .badge").text(JSON.parse(r.responseText)['remaininginteractions']);
-                    if (JSON.parse(r.responseText)['remaininginteractions'] < 1) {
+                    $responseDiv.text(text);
+
+                    let remainingInteractions = response['remaininginteractions'];
+                    $("#aichatbot-send-button .badge").text(remainingInteractions);
+
+                    if (remainingInteractions < 1) {
                         $sendButton.prop('disabled', true);
                         $sendButton.addClass('disabled');
                         $finishButton.prop('disabled', true);

@@ -74,18 +74,19 @@ switch ($action) {
 
             // Success.
             if ($success) {
-                $responsetext = $response->get_response_data();
-                echo json_encode($responsetext, JSON_PRETTY_PRINT);
+                $responsedata = $response->get_response_data();
 
                 // Log.
-                aichatbot::log_conversation($prompttext, $responsetext['generatedcontent'], $cmid);
+                aichatbot::log_conversation($prompttext, $responsedata['generatedcontent'], $cmid);
 
                 // Reduce remaining interactions/attempts.
-                $responsetext['remaininginteractions'] = aichatbot::get_remaining_interactions($cmid);
-                $responsetext['remainingattempts'] = aichatbot::get_remaining_attempts($cmid);
-                if ($responsetext['remaininginteractions'] < 1) {
+                $responsedata['remaininginteractions'] = aichatbot::get_remaining_interactions($cmid);
+                $responsedata['remainingattempts'] = aichatbot::get_remaining_attempts($cmid);
+                if ($responsedata['remaininginteractions'] < 1) {
                     aichatbot::set_conversation_complete($cmid, $USER->id);
                 }
+
+                echo json_encode($responsedata, JSON_PRETTY_PRINT);
             } else {
                 // Error.
                 $error = $response->get_errormessage();
@@ -94,7 +95,7 @@ switch ($action) {
         }
         break;
     case 'confirmfinish':
-        mod_aichatbot_set_conversation_complete($cmid, $USER->id);
+        aichatbot::set_conversation_complete($cmid, $USER->id);
         break;
     case 'shareconversation':
         aichatbot::share_conversation($conversationid, $USER->id, $cmid);
